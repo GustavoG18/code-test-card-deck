@@ -74,6 +74,7 @@ class CardDeck {
 				}
 			});
 		});
+		this.filterAndDrawByParams();
 	}
 
 	generateRandomNumber(min, max) {
@@ -133,7 +134,7 @@ class CardDeck {
 	}
 
 	discard(id) {
-		let card = this.hand.find((x) => x.id === id);
+		let card = this.hand.find((x) => x.id === id);	
 		let cardElement = document.getElementById(id);
 
 		this.deck.push(card);
@@ -164,6 +165,45 @@ class CardDeck {
 		this.possibleCards.forEach((card) => {
 			this.draw(card.id);
 		});
+	}
+	filterAndDrawByParams() {
+		const currentUrl = window.location.href;
+		const params = new URLSearchParams(new URL(currentUrl).search);
+		if(params.size) {
+			for (const [key, value] of params) {
+				if(key !== "limit" && key !== "sorted") {
+					const { cardProp, values } = this.getPropsToFilter(key, value);
+					this.filter(cardProp, values);
+				}
+				if(key === "limit") {
+					this.limit(value)
+				}
+				if(key === "sorted") {
+					this.sort()
+				}
+			}
+			this.drawFiltered();
+		}
+	}
+	getPropsToFilter(key, value) {
+		let cardProp = "";
+		let values = value.split(" ");
+		switch(key){
+			case "suits":
+				cardProp = "suit";
+				break;
+			case "ranks":
+				cardProp = "rank";
+				values = values.map((value) => Number(value));
+				break;
+			case "cards":
+				cardProp = "id";
+				break;
+		}
+		return {
+			cardProp,
+			values,
+		}
 	}
 }
 
